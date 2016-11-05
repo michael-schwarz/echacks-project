@@ -26,7 +26,7 @@ CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 JPG_EXT = ".jpg"
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'JPG', 'JPEG'])  # 'png', 'gif'
 DEFAULT_IMG = CURRENT_DIRECTORY + 'default-img' + JPG_EXT
-app.use_x_sendfile = True
+#app.use_x_sendfile = True
 
 
 @app.route('/')
@@ -90,7 +90,7 @@ def getPicturesByCoords(lat, lng, radius):
     params = (lat, lng, radius)
     conn = mysql.connect()
     cur = conn.cursor()
-    query = "SELECT * FROM picture WHERE id = %s"
+    query = "SELECT id, user_id, lat, lng FROM picture WHERE lat > "
     cur.execute(query, params)
     data = cur.fetchall()
     conn.close()
