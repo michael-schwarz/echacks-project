@@ -101,5 +101,24 @@ def user(id):
     return json.jsonify({"id": 1234, "email": "blabla@tum.de", "score": 4742})
 
 
+# register info
+@app.route('/createUser/<email>/<username>/<password>/')
+def createUser(email, username, password):
+    params = (email, username, password)
+    #conn = mysql.connect()
+    #cur = conn.cursor()
+
+    return "ok"
+
+#username
+#email
+#password
+#sale - leave it empty
+
+@app.route('/hello/')
+def hello():
+    return 'Hello, World'
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
