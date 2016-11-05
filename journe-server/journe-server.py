@@ -102,15 +102,15 @@ def getPictureByCoords(lat, lng, radius):
 
 @app.route('/user/<id>/')
 def user(id):
-    # params = (id)
-    # conn = mysql.connect()
-    # cur = conn.cursor()
-    # query = "SELECT * FROM picture WHERE id = %s"
-    # cur.execute(query, params)
-    # data = cur.fetchall()
-    # conn.close()
+    params = (id)
+    conn = mysql.connect()
+    cur = conn.cursor()
+    query = "SELECT id, email, points FROM user WHERE id = %s"
+    cur.execute(query, params)
+    data = cur.fetchone()
+    conn.close()
 
-    return json.jsonify({"id": 1234, "email": "blabla@tum.de", "score": 4742})
+    return json.jsonify({"id": data[0], "email": data[1], "points": data[2]})
 
 
 # register info
