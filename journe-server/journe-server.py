@@ -58,6 +58,7 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
+
 # SAVE PICTURE
 @app.route('/savePicture/<user_id>/<lat>/<lng>/', methods=['POST'])
 def savePicture(user_id, lat, lng):
@@ -84,6 +85,7 @@ def savePicture(user_id, lat, lng):
         return "Success"
 
     return "End of function saveImage, no successful!!"
+
 
 @app.route('/getPicturesByCoords/<lat>/<lng>/<radius>/')
 def getPicturesByCoords(lat, lng, radius):
@@ -157,26 +159,6 @@ def login(email, userPass):
             return user(data[2])
 
     return json.jsonify({})
-
-    #     return json.jsonify({"id": data[0], "email": data[1], "points": data[2]})
-    # else:
-    #     return json.jsonify({})
-    #
-    #
-    # params = (email, password, salt)
-    #
-    # conn = mysql.connect()
-    # cur = conn.cursor()
-    # query = "SELECT id, email, points FROM user WHERE id = %s"
-    # cur.execute(query, params)
-    # data = cur.fetchone()
-    # conn.close()
-
-
-# 1. get the salt by email
-# 2. generate passwordhash with salt and password parameter
-# 3. check if there is user email and passwordhash
-# 4. if there is finding someone, then returning the data
 
 def getPasswordHash(password, salt):
     return hashlib.sha512(password + salt).hexdigest()
