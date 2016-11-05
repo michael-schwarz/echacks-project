@@ -59,17 +59,25 @@ def allowed_file(filename):
 # SAVE PICTURE
 @app.route('/savePicture/<user_id>/<lat>/<lng>/', methods=['POST'])
 def savePicture(user_id, lat, lng):
+    params = (user_id, lat, lng)
+    # user_id = int(user_id)
+    # lat = float(lat)
+    # lng = float(lng)
     if request.method == 'POST':
         # check if the post request has the file part
         if 'imagefile' not in request.files:
             return 'No file part'
 
-        # cur.execute("INSERT INTO picture(id, user_id, lat, lng) VALUES('', % s, % s, % s, % s, % s, % s, % s)"""
+        conn = mysql.connect()
+        cur = conn.cursor()
+        query = "INSERT INTO picture(user_id, lat, lng) VALUES(%s, %s, %s)"
+        cur.execute(query, params)
+        id = cur.lastrowid
+        conn.commit()
+        conn.close()
 
         file = request.files['imagefile']
-        # if user does not select file, browser also
-        # submit a empty part without filename
-        file.filename = '1.jpg'
+        file.filename = str(id) + JPG_EXT
         file.save(CURRENT_DIRECTORY + UPLOAD_FOLDER + file.filename)
         return "Success"
 
