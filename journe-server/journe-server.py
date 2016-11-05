@@ -28,7 +28,7 @@ def getPicture(id):
     cur = conn.cursor()
     query = "SELECT filename FROM picture WHERE id = %s"
     cur.execute(query, id)
-    filename = "images/" + cur.fetchone()[0]
+    filename = "image/" + cur.fetchone()[0]
 
     conn.close()
 
@@ -45,6 +45,19 @@ def getPictureByCoords(lat,lng,radius):
     conn.close()
 
     return json.jsonify(data)
+
+@app.route('/user/<id>/')
+def user(id):
+    # params = (id)
+    # conn = mysql.connect()
+    # cur = conn.cursor()
+    # query = "SELECT * FROM picture WHERE id = %s"
+    # cur.execute(query, params)
+    # data = cur.fetchall()
+    # conn.close()
+
+    return json.jsonify({"id":1234, "email":"blabla@tum.de", "score":4742})
+
 
 
 if __name__ == '__main__':
