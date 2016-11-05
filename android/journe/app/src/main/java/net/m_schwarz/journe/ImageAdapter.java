@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import java.io.InputStream;
 
@@ -36,22 +37,22 @@ public class ImageAdapter extends ArrayAdapter<GeoImage> {
 
         ImageView imageView = (ImageView) rowView.findViewById(R.id.icon);
         if(BitmapCache.contains(values[position].url)){
+            ProgressBar progressBar = (ProgressBar) rowView.findViewById(R.id.spinner);
+            progressBar.setVisibility(View.GONE);
+            imageView.setVisibility(View.VISIBLE);
             imageView.setImageBitmap(BitmapCache.get(values[position].url));
         } else{
-            if(true || !BitmapCache.inTemptative(values[position].url)){
+            if(!BitmapCache.inTemptative(values[position].url)){
                 BitmapCache.putTemptative(values[position].url);
-                new ImageDownloader(imageView).execute(values[position].url);
+                new ImageDownloader().execute(values[position].url);
             }
         }
         return rowView;
     }
 
     class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
-        ImageView bmImage;
 
-        public ImageDownloader(ImageView bmImage) {
-            this.bmImage = bmImage;
-        }
+        public ImageDownloader() {}
 
         protected Bitmap doInBackground(String... urls) {
             String url = urls[0];
@@ -59,7 +60,7 @@ public class ImageAdapter extends ArrayAdapter<GeoImage> {
             try {
                 InputStream in = new java.net.URL(url).openStream();
                 mIcon = BitmapFactory.decodeStream(in);
-                mIcon = Bitmap.createScaledBitmap(mIcon,mIcon.getWidth()/2,mIcon.getHeight()/2,true);
+                // mIcon = Bitmap.createScaledBitmap(mIcon,mIcon.getWidth()/2,mIcon.getHeight()/2,true);
                 BitmapCache.put(urls[0],mIcon);
             } catch (Exception e) {
                 Log.e("Error", e.getMessage());
@@ -67,8 +68,9 @@ public class ImageAdapter extends ArrayAdapter<GeoImage> {
             return mIcon;
         }
 
-        protected void onPostExecute(Bitmap result) {
-            bmImage.setImageBitmap(result);
+        @Override
+        public void onPostExecute(Bitmap bmp){
+            notifyDataSetChanged();
         }
     }
 }

@@ -5,5 +5,5 @@ package net.m_schwarz.journe.Comm;
  */
 
 public class Config {
-    public static String baseUrl = "http://echacks.lukas-kompatscher.eu:5000";
+    public static String baseUrl = "http://35.162.35.171:5000";
 }

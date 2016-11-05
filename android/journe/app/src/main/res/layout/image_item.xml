@@ -2,13 +2,20 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="200dip"
-    android:padding="0dip" >
-
+    android:padding="0dip"  >
+    <ProgressBar
+        android:id="@+id/spinner"
+        android:indeterminate="true"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        />
     <ImageView
         android:id="@+id/icon"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:contentDescription="TODO"
         android:scaleType="centerCrop"
+        android:visibility="gone"
         android:src="@drawable/side_nav_bar" />
 </RelativeLayout>
