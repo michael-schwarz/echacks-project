@@ -40,7 +40,7 @@ def getPicture(id):
     cur = conn.cursor()
     query = "SELECT id FROM picture WHERE id = %s"
     cur.execute(query, id)
-    filename = UPLOAD_FOLDER + str(cur.fetchone()[0]) + JPG_EXT
+    filename = CURRENT_DIRECTORY + UPLOAD_FOLDER + str(cur.fetchone()[0]) + JPG_EXT
 
     conn.close()
 
