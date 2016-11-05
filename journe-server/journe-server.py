@@ -58,7 +58,7 @@ def savePicture(user_id, lat, lng):
         if 'imagefile' not in request.files:
             return 'No file part'
 
-
+        cur.execute("INSERT INTO picture(id, user_id, lat, lng) VALUES('', % s, % s, % s, % s, % s, % s, % s)"""
 
         file = request.files['imagefile']
         # if user does not select file, browser also
