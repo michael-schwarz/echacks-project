@@ -21,13 +21,6 @@ public class RegisterActivity extends AppCompatActivity {
         Preferences preferences = new Preferences(this);
         preferences.setUserId(42);
 
-        Intent intent = new Intent(this,MainActivity.class);
-        finish();
-        startActivity(intent);
-    }
-
-    public void clickLogin(View view) {
-
         EditText et = (EditText) findViewById(R.id.username);
         String email = et.getText().toString().trim();
         String emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
@@ -47,6 +40,12 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
+        Intent intent = new Intent(this,MainActivity.class);
+        finish();
+        startActivity(intent);
+    }
+
+    public void clickLogin(View view) {
         Intent intent = new Intent(this,LoginActivity.class);
         finish();
         startActivity(intent);
