@@ -1,4 +1,5 @@
 import os
+import hashlib, uuid
 
 from flask import send_file
 
@@ -26,6 +27,7 @@ UPLOAD_FOLDER = 'image/'
 CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 JPG_EXT = ".jpg"
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'JPG', 'JPEG'])  # 'png', 'gif'
+DEFAULT_IMG = CURRENT_DIRECTORY + 'default-img' + JPG_EXT
 
 
 
@@ -40,16 +42,18 @@ def getPicture(id):
     cur = conn.cursor()
     query = "SELECT id FROM picture WHERE id = %s"
     cur.execute(query, id)
-    filename = CURRENT_DIRECTORY + UPLOAD_FOLDER + str(cur.fetchone()[0]) + JPG_EXT
+    data = cur.fetchone()
+    filename = ''
+    if data is not None and len(data) > 0:
+        filename = CURRENT_DIRECTORY + UPLOAD_FOLDER + str(data[0]) + JPG_EXT
 
     conn.close()
 
     if os.path.isfile(filename):
         return send_file(filename, mimetype='image/jpeg')
     else:
-        return "Failed to get image \"" + filename + "\""
-
-    return "End of function getPicture"
+        print "Failed to get image \"" + filename + "\". Return default image."
+        return send_file(DEFAULT_IMG, mimetype='image/jpeg')
 
 
 def allowed_file(filename):
@@ -110,23 +114,25 @@ def user(id):
 
 
 # register info
-@app.route('/createUser/<email>/<username>/<password>/')
-def createUser(email, username, password):
-    params = (email, username, password)
+@app.route('/createUser/<email>/<password>/')
+def createUser(email, password):
+    salt = uuid.uuid4().hex
+    hashed_password = getPasswordHash(password, salt)
+    params = (email, hashed_password, salt)
+
     conn = mysql.connect()
     cur = conn.cursor()
-    query = "INSERT INTO user(username, email, password) VALUES(%s, %s, %s)"
+    query = "INSERT INTO user(email, password, salt) VALUES(%s, %s, %s)"
     cur.execute(query, params)
-    id = cur.lastrowid
+    # id = cur.lastrowid
     conn.commit()
     conn.close()
 
-    return "Done"
+    return "OK. Added user " + email
 
-#username
-#email
-#password
-#sale - leave it empty
+def getPasswordHash(password, salt):
+    return hashlib.sha512(password + salt).hexdigest()
+
 
 @app.route('/hello/')
 def hello():
