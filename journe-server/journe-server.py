@@ -26,7 +26,7 @@ CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 JPG_EXT = ".jpg"
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'JPG', 'JPEG'])  # 'png', 'gif'
 DEFAULT_IMG = CURRENT_DIRECTORY + 'default-img' + JPG_EXT
-app.use_x_sendfile = True
+#app.use_x_sendfile = True
 
 
 @app.route('/')
@@ -90,14 +90,14 @@ def getPicturesByCoords(lat, lng, radius):
     params = (lat, lng, radius)
     conn = mysql.connect()
     cur = conn.cursor()
-    query = "SELECT * FROM picture WHERE id = %s"
+    query = "SELECT id, user_id, lat, lng FROM picture WHERE lat > "
     cur.execute(query, params)
     data = cur.fetchall()
     conn.close()
 
     return json.jsonify(data)
 
-
+#get use by id
 @app.route('/user/<id>/')
 def user(id):
     params = (id)
@@ -131,13 +131,55 @@ def createUser(email, password):
 
     return "OK. Added user " + email
 
+# login
+@app.route('/login/<email>/<userPass>/')
+def login(email, userPass):
+    conn = mysql.connect()
+    cur = conn.cursor()
+    query = "SELECT salt, password, id FROM user WHERE email = %s"
+    cur.execute(query, email)
+    data = cur.fetchone()
+    conn.close()
+
+    if data is not None:
+        password_matchtest = getPasswordHash(userPass, data[0]) # Here, data is salt,
+        #password_matchtest after running becomes hashed_password
+
+        #print (password_matchtest+ '\n')
+        #print (data[1] + '\n')
+
+        if password_matchtest == data[1]:   #data[1] here is the password stored in the database
+            return user(data[2])
+
+    return json.jsonify({})
+
+    #     return json.jsonify({"id": data[0], "email": data[1], "points": data[2]})
+    # else:
+    #     return json.jsonify({})
+    #
+    #
+    # params = (email, password, salt)
+    #
+    # conn = mysql.connect()
+    # cur = conn.cursor()
+    # query = "SELECT id, email, points FROM user WHERE id = %s"
+    # cur.execute(query, params)
+    # data = cur.fetchone()
+    # conn.close()
+
+
+# 1. get the salt by email
+# 2. generate passwordhash with salt and password parameter
+# 3. check if there is user email and passwordhash
+# 4. if there is finding someone, then returning the data
+
 def getPasswordHash(password, salt):
     return hashlib.sha512(password + salt).hexdigest()
 
 
 @app.route('/hello/')
 def hello():
-    return 'Hello, World'
+    return 'Hello, World!!!'
 
 
 if __name__ == '__main__':
