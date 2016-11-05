@@ -24,6 +24,7 @@ mysql.init_app(app)
 # Image folder configuration
 UPLOAD_FOLDER = 'image/'
 CURRENT_DIRECTORY = os.path.dirname(__file__) + '/'
+JPG_EXT = ".jpg"
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'JPG', 'JPEG'])  # 'png', 'gif'
 
 
@@ -37,13 +38,18 @@ def main():
 def getPicture(id):
     conn = mysql.connect()
     cur = conn.cursor()
-    query = "SELECT filename FROM picture WHERE id = %s"
+    query = "SELECT id FROM picture WHERE id = %s"
     cur.execute(query, id)
-    filename = UPLOAD_FOLDER + cur.fetchone()[0]
+    filename = UPLOAD_FOLDER + str(cur.fetchone()[0]) + JPG_EXT
 
     conn.close()
 
-    return send_file(filename, mimetype='image/jpeg')
+    if os.path.isfile(filename):
+        return send_file(filename, mimetype='image/jpeg')
+    else:
+        return "Failed to get image \"" + filename + "\""
+
+    return "End of function getPicture"
 
 
 def allowed_file(filename):
@@ -58,7 +64,7 @@ def savePicture(user_id, lat, lng):
         if 'imagefile' not in request.files:
             return 'No file part'
 
-
+        # cur.execute("INSERT INTO picture(id, user_id, lat, lng) VALUES('', % s, % s, % s, % s, % s, % s, % s)"""
 
         file = request.files['imagefile']
         # if user does not select file, browser also
