@@ -9,45 +9,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="net.m_schwarz.journe.RegisterActivity">
 
-    <ImageButton
-        android:id="@+id/imageBox"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:src="@drawable/uni_ljubljana"
-        android:scaleType="fitCenter"
-        />
-
-
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/username"
-        android:layout_below="@+id/imageBox"
-        android:layout_alignParentStart="true"
-        android:maxLines="1"
-        android:inputType="textWebEmailAddress"
-        android:hint="Email"
-    />
-
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/password"
-        android:layout_below="@id/username"
-        android:maxLines="1"
-        android:inputType="textPassword"
-        android:hint="Password"
-    />
-
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/password_repeat"
-        android:layout_below="@id/password"
-        android:maxLines="1"
-        android:inputType="textPassword"
-        android:hint="Repeat password"
-        />
 
     <Button
         android:layout_width="wrap_content"
@@ -56,7 +17,7 @@
         android:layout_alignParentLeft="true"
         android:text="Login"
         android:onClick="clickLogin"
-        />
+        android:id="@+id/button" />
 
     <Button
         android:layout_width="wrap_content"
@@ -66,5 +27,51 @@
         android:text="Register"
         android:onClick="clickRegister"
         />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/username"
+        android:maxLines="1"
+        android:inputType="textWebEmailAddress"
+        android:hint="Email"
+        android:layout_below="@+id/imageBox"
+        android:layout_alignParentStart="true"
+        android:gravity="center"
+        android:layout_marginTop="54dp" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/password"
+        android:maxLines="1"
+        android:inputType="textPassword"
+        android:hint="Password"
+        android:layout_below="@+id/username"
+        android:layout_alignParentStart="true"
+        android:gravity="center"
+        android:layout_marginTop="19dp" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/password_repeat"
+        android:maxLines="1"
+        android:inputType="textPassword"
+        android:hint="Repeat password"
+        android:gravity="center"
+        android:layout_marginTop="19dp"
+        android:layout_below="@+id/password"
+        android:layout_alignParentStart="true" />
+
+    <ImageButton
+        android:id="@+id/imageBox"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:src="@drawable/journe"
+        android:scaleType="fitCenter"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="10dp" />
 
 </RelativeLayout>

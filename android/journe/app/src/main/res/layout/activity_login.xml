@@ -12,32 +12,38 @@
     <ImageButton
         android:id="@+id/imageBox"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:src="@drawable/uni_ljubljana"
+        android:layout_height="120dp"
+        android:src="@drawable/journe"
         android:scaleType="fitCenter"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="10dp"
         />
-
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/username"
-        android:layout_below="@+id/imageBox"
-        android:layout_alignParentStart="true"
         android:maxLines="1"
         android:inputType="textWebEmailAddress"
         android:hint="Email"
+        android:layout_below="@+id/imageBox"
+        android:layout_alignParentStart="true"
+        android:gravity="center"
+        android:layout_marginTop="54dp" />
     />
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/password"
-        android:layout_below="@id/username"
         android:maxLines="1"
         android:inputType="textPassword"
         android:hint="Password"
-    />
+        android:layout_below="@+id/username"
+        android:layout_alignParentStart="true"
+        android:gravity="center"
+        android:layout_marginTop="19dp" />
 
     <Button
         android:layout_width="wrap_content"

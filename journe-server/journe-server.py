@@ -9,8 +9,6 @@ from flask import Flask, render_template, json
 from flask.ext.mysql import MySQL
 
 from flask import Flask, request, redirect, url_for
-from werkzeug.utils import secure_filename
-
 
 app = Flask(__name__)
 mysql = MySQL()
@@ -28,7 +26,7 @@ CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 JPG_EXT = ".jpg"
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'JPG', 'JPEG'])  # 'png', 'gif'
 DEFAULT_IMG = CURRENT_DIRECTORY + 'default-img' + JPG_EXT
-
+#app.use_x_sendfile = True
 
 
 @app.route('/')
@@ -60,6 +58,7 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
+
 # SAVE PICTURE
 @app.route('/savePicture/<user_id>/<lat>/<lng>/', methods=['POST'])
 def savePicture(user_id, lat, lng):
@@ -87,30 +86,39 @@ def savePicture(user_id, lat, lng):
 
     return "End of function saveImage, no successful!!"
 
-@app.route('/getPictureByCoords/<lat>/<lng>/<radius>')
-def getPictureByCoords(lat, lng, radius):
-    params = (lat, lng, radius)
+
+@app.route('/getPicturesByCoords/<lat>/<lng>/<radius>/')
+def getPicturesByCoords(lat, lng, radius):
+    latMin = float(lat) - float(radius)
+    latMax = float(lat) + float(radius)
+    lngMin = float(lng) - float(radius)
+    lngMax = float(lng) + float(radius)
+    params = (latMin, latMax, lngMin, lngMax)
+
     conn = mysql.connect()
     cur = conn.cursor()
-    query = "SELECT * FROM picture WHERE id = %s"
+    query = "SELECT id, user_id, lat, lng FROM picture WHERE lat > %s AND lat < %s AND lng > %s AND lng < %s"
     cur.execute(query, params)
     data = cur.fetchall()
     conn.close()
 
     return json.jsonify(data)
 
-
+#get use by id
 @app.route('/user/<id>/')
 def user(id):
-    # params = (id)
-    # conn = mysql.connect()
-    # cur = conn.cursor()
-    # query = "SELECT * FROM picture WHERE id = %s"
-    # cur.execute(query, params)
-    # data = cur.fetchall()
-    # conn.close()
+    params = (id)
+    conn = mysql.connect()
+    cur = conn.cursor()
+    query = "SELECT id, email, points FROM user WHERE id = %s"
+    cur.execute(query, params)
+    data = cur.fetchone()
+    conn.close()
 
-    return json.jsonify({"id": 1234, "email": "blabla@tum.de", "score": 4742})
+    if data is not None:
+        return json.jsonify({"id": data[0], "email": data[1], "points": data[2]})
+    else:
+        return json.jsonify({})
 
 
 # register info
@@ -130,14 +138,36 @@ def createUser(email, password):
 
     return "OK. Added user " + email
 
+# login
+@app.route('/login/<email>/<userPass>/')
+def login(email, userPass):
+    conn = mysql.connect()
+    cur = conn.cursor()
+    query = "SELECT salt, password, id FROM user WHERE email = %s"
+    cur.execute(query, email)
+    data = cur.fetchone()
+    conn.close()
+
+    if data is not None:
+        password_matchtest = getPasswordHash(userPass, data[0]) # Here, data is salt,
+        #password_matchtest after running becomes hashed_password
+
+        #print (password_matchtest+ '\n')
+        #print (data[1] + '\n')
+
+        if password_matchtest == data[1]:   #data[1] here is the password stored in the database
+            return user(data[2])
+
+    return json.jsonify({})
+
 def getPasswordHash(password, salt):
     return hashlib.sha512(password + salt).hexdigest()
 
 
 @app.route('/hello/')
 def hello():
-    return 'Hello, World'
+    return 'Hello, World!!!'
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0',threaded=True)
