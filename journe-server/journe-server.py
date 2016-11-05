@@ -113,10 +113,15 @@ def user(id):
 @app.route('/createUser/<email>/<username>/<password>/')
 def createUser(email, username, password):
     params = (email, username, password)
-    #conn = mysql.connect()
-    #cur = conn.cursor()
+    conn = mysql.connect()
+    cur = conn.cursor()
+    query = "INSERT INTO user(username, email, password) VALUES(%s, %s, %s)"
+    cur.execute(query, params)
+    id = cur.lastrowid
+    conn.commit()
+    conn.close()
 
-    return "ok"
+    return "Done"
 
 #username
 #email
