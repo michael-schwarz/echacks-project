@@ -30,5 +30,20 @@ public class LoginActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(),"Invalid email address", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        EditText pass = (EditText) findViewById(R.id.password);
+        String password = pass.getText().toString().trim();
+
+        if (password.equals("")) {
+            Toast.makeText(getApplicationContext(), "Please enter your password.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Preferences preferences = new Preferences(this);
+        preferences.setUserId(42);
+
+        Intent intent = new Intent(this,MainActivity.class);
+        finish();
+        startActivity(intent);
     }
 }
