@@ -4,6 +4,7 @@ import credentials
 from flask import Flask, render_template, json
 from flask.ext.mysql import MySQL
 
+
 app = Flask(__name__)
 mysql = MySQL()
 
@@ -32,4 +33,4 @@ def picture(id):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')
