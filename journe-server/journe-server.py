@@ -23,7 +23,7 @@ mysql.init_app(app)
 
 # Image folder configuration
 UPLOAD_FOLDER = 'image/'
-CURRENT_DIRECTORY = os.path.dirname(__file__) + '/'
+CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 JPG_EXT = ".jpg"
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'JPG', 'JPEG'])  # 'png', 'gif'
 
