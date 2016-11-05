@@ -23,7 +23,7 @@ mysql.init_app(app)
 
 # Image folder configuration
 UPLOAD_FOLDER = 'image/'
-CURRENT_DIRECTORY = os.path.dirname(__file__) + '/'
+CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 JPG_EXT = ".jpg"
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'JPG', 'JPEG'])  # 'png', 'gif'
 
@@ -40,7 +40,7 @@ def getPicture(id):
     cur = conn.cursor()
     query = "SELECT id FROM picture WHERE id = %s"
     cur.execute(query, id)
-    filename = UPLOAD_FOLDER + str(cur.fetchone()[0]) + JPG_EXT
+    filename = CURRENT_DIRECTORY + UPLOAD_FOLDER + str(cur.fetchone()[0]) + JPG_EXT
 
     conn.close()
 
@@ -107,6 +107,30 @@ def user(id):
     # conn.close()
 
     return json.jsonify({"id": 1234, "email": "blabla@tum.de", "score": 4742})
+
+
+# register info
+@app.route('/createUser/<email>/<username>/<password>/')
+def createUser(email, username, password):
+    params = (email, username, password)
+    conn = mysql.connect()
+    cur = conn.cursor()
+    query = "INSERT INTO user(username, email, password) VALUES(%s, %s, %s)"
+    cur.execute(query, params)
+    id = cur.lastrowid
+    conn.commit()
+    conn.close()
+
+    return "Done"
+
+#username
+#email
+#password
+#sale - leave it empty
+
+@app.route('/hello/')
+def hello():
+    return 'Hello, World'
 
 
 if __name__ == '__main__':
