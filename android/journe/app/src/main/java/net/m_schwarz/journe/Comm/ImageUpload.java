@@ -15,7 +15,7 @@ public class ImageUpload {
         try {
             String charset = "UTF-8";
             String requestURL = Config.baseUrl + "/savePicture/22/" + location.getLatitude() +"/" +
-                    location.getLatitude()+ "/";
+                    location.getLongitude()+ "/";
 
             MultipartUtility multipart = new MultipartUtility(requestURL, charset);
 

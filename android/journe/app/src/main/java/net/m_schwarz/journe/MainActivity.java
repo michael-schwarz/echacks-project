@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity
 
         GeoImage[] values = new GeoImage[10];
         for (int i = 0; i < 10; i++) {
-            values[i] = new GeoImage();
+            values[i] = new GeoImage("http://echacks.lukas-kompatscher.eu:5000/getPicture/"+(i+14)+"/");
         }
 
 
