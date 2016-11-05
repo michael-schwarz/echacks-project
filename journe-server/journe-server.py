@@ -9,8 +9,6 @@ from flask import Flask, render_template, json
 from flask.ext.mysql import MySQL
 
 from flask import Flask, request, redirect, url_for
-from werkzeug.utils import secure_filename
-
 
 app = Flask(__name__)
 mysql = MySQL()
@@ -28,8 +26,6 @@ CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 JPG_EXT = ".jpg"
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'JPG', 'JPEG'])  # 'png', 'gif'
 DEFAULT_IMG = CURRENT_DIRECTORY + 'default-img' + JPG_EXT
-
-
 
 @app.route('/')
 def main():
