@@ -9,8 +9,6 @@ from flask import Flask, render_template, json
 from flask.ext.mysql import MySQL
 
 from flask import Flask, request, redirect, url_for
-from werkzeug.utils import secure_filename
-
 
 app = Flask(__name__)
 mysql = MySQL()
@@ -28,8 +26,6 @@ CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 JPG_EXT = ".jpg"
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'JPG', 'JPEG'])  # 'png', 'gif'
 DEFAULT_IMG = CURRENT_DIRECTORY + 'default-img' + JPG_EXT
-
-
 
 @app.route('/')
 def main():
@@ -87,8 +83,8 @@ def savePicture(user_id, lat, lng):
 
     return "End of function saveImage, no successful!!"
 
-@app.route('/getPictureByCoords/<lat>/<lng>/<radius>')
-def getPictureByCoords(lat, lng, radius):
+@app.route('/getPicturesByCoords/<lat>/<lng>/<radius>')
+def getPicturesByCoords(lat, lng, radius):
     params = (lat, lng, radius)
     conn = mysql.connect()
     cur = conn.cursor()
@@ -102,15 +98,18 @@ def getPictureByCoords(lat, lng, radius):
 
 @app.route('/user/<id>/')
 def user(id):
-    # params = (id)
-    # conn = mysql.connect()
-    # cur = conn.cursor()
-    # query = "SELECT * FROM picture WHERE id = %s"
-    # cur.execute(query, params)
-    # data = cur.fetchall()
-    # conn.close()
+    params = (id)
+    conn = mysql.connect()
+    cur = conn.cursor()
+    query = "SELECT id, email, points FROM user WHERE id = %s"
+    cur.execute(query, params)
+    data = cur.fetchone()
+    conn.close()
 
-    return json.jsonify({"id": 1234, "email": "blabla@tum.de", "score": 4742})
+    if data is not None:
+        return json.jsonify({"id": data[0], "email": data[1], "points": data[2]})
+    else:
+        return json.jsonify({})
 
 
 # register info
@@ -140,4 +139,4 @@ def hello():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0',threaded=True)
