@@ -2,8 +2,6 @@ package net.m_schwarz.journe;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,8 +21,8 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import net.m_schwarz.journe.Comm.ImageUpload;
 import net.m_schwarz.journe.Comm.User;
 
 import java.io.File;
@@ -155,10 +153,29 @@ public class MainActivity extends AppCompatActivity
 
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == Activity.RESULT_OK) {
+        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
+
+            AsyncTask<Void,Void,Void> getUserDetailsTask = new AsyncTask<Void,Void,Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    try {
+                        ImageUpload img = new ImageUpload();
+                        img.doIt(new File(mCurrentPhotoPath));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void _void) { }
+            };
+
+            getUserDetailsTask.execute();
+            /*
             BitmapFactory.Options bmOptions = new BitmapFactory.Options();
             Bitmap bitmap= BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-            Toast.makeText(this,"" + bitmap.getByteCount(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,"" + bitmap.getByteCount(), Toast.LENGTH_SHORT).show(); */
         }
     }
 
