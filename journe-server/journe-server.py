@@ -83,8 +83,8 @@ def savePicture(user_id, lat, lng):
 
     return "End of function saveImage, no successful!!"
 
-@app.route('/getPictureByCoords/<lat>/<lng>/<radius>')
-def getPictureByCoords(lat, lng, radius):
+@app.route('/getPicturesByCoords/<lat>/<lng>/<radius>')
+def getPicturesByCoords(lat, lng, radius):
     params = (lat, lng, radius)
     conn = mysql.connect()
     cur = conn.cursor()
@@ -136,4 +136,4 @@ def hello():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0',threaded=True)
