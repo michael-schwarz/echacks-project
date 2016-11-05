@@ -9,14 +9,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="net.m_schwarz.journe.RegisterActivity">
 
-    <ImageButton
-        android:id="@+id/imageBox"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:src="@drawable/uni_ljubljana"
-        android:scaleType="fitCenter"
-        />
-
 
     <Button
         android:layout_width="wrap_content"
@@ -71,5 +63,15 @@
         android:layout_marginTop="19dp"
         android:layout_below="@+id/password"
         android:layout_alignParentStart="true" />
+
+    <ImageButton
+        android:id="@+id/imageBox"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:src="@drawable/journe"
+        android:scaleType="fitCenter"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="10dp" />
 
 </RelativeLayout>
