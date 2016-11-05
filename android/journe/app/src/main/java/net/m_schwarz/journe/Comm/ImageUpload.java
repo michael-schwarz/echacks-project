@@ -1,5 +1,6 @@
 package net.m_schwarz.journe.Comm;
 
+import android.location.Location;
 import android.util.Log;
 
 import java.io.File;
@@ -10,10 +11,11 @@ import java.util.List;
  */
 
 public class ImageUpload {
-    public void doIt(File file) {
+    public void doIt(File file, Location location) {
         try {
             String charset = "UTF-8";
-            String requestURL = Config.baseUrl + "/savePicture/22/3/5/";
+            String requestURL = Config.baseUrl + "/savePicture/22/" + location.getLatitude() +"/" +
+                    location.getLatitude()+ "/";
 
             MultipartUtility multipart = new MultipartUtility(requestURL, charset);
 
@@ -27,7 +29,6 @@ public class ImageUpload {
                 Log.v("rht", "Line : " + line);
             }
         }
-
         catch(Exception e) {
             e.printStackTrace();
         }
