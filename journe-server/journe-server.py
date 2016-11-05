@@ -1,4 +1,7 @@
 import os
+
+from flask import send_file
+
 import credentials
 
 from flask import Flask, render_template, json
@@ -19,17 +22,29 @@ mysql.init_app(app)
 def main():
     return render_template('index.html')
 
+@app.route('/getPicture/<id>/')
+def getPicture(id):
+    conn = mysql.connect()
+    cur = conn.cursor()
+    query = "SELECT filename FROM picture WHERE id = %s"
+    cur.execute(query, id)
+    filename = "images/" + cur.fetchone()[0]
 
-@app.route('/picture/<id>/')
-def picture(id):
+    conn.close()
+
+    return send_file(filename, mimetype='image/jpeg')
+
+@app.route('/getPictureByCoords/<lat>/<lng>/<radius>')
+def getPictureByCoords(lat,lng,radius):
+    params = (lat, lng, radius)
     conn = mysql.connect()
     cur = conn.cursor()
     query = "SELECT * FROM picture WHERE id = %s"
-    cur.execute(query, id)
+    cur.execute(query, params)
     data = cur.fetchall()
+    conn.close()
 
     return json.jsonify(data)
-
 
 
 if __name__ == '__main__':
