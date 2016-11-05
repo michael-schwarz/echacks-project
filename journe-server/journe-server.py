@@ -106,7 +106,10 @@ def user(id):
     data = cur.fetchone()
     conn.close()
 
-    return json.jsonify({"id": data[0], "email": data[1], "points": data[2]})
+    if data is not None:
+        return json.jsonify({"id": data[0], "email": data[1], "points": data[2]})
+    else:
+        return json.jsonify({})
 
 
 # register info
