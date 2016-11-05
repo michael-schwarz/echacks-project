@@ -85,12 +85,17 @@ def savePicture(user_id, lat, lng):
 
     return "End of function saveImage, no successful!!"
 
-@app.route('/getPicturesByCoords/<lat>/<lng>/<radius>')
+@app.route('/getPicturesByCoords/<lat>/<lng>/<radius>/')
 def getPicturesByCoords(lat, lng, radius):
-    params = (lat, lng, radius)
+    latMin = float(lat) - float(radius)
+    latMax = float(lat) + float(radius)
+    lngMin = float(lng) - float(radius)
+    lngMax = float(lng) + float(radius)
+    params = (latMin, latMax, lngMin, lngMax)
+
     conn = mysql.connect()
     cur = conn.cursor()
-    query = "SELECT id, user_id, lat, lng FROM picture WHERE lat > "
+    query = "SELECT id, user_id, lat, lng FROM picture WHERE lat > %s AND lat < %s AND lng > %s AND lng < %s"
     cur.execute(query, params)
     data = cur.fetchall()
     conn.close()
