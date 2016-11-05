@@ -1,4 +1,5 @@
 import os
+import hashlib, uuid
 
 from flask import send_file
 
@@ -110,23 +111,25 @@ def user(id):
 
 
 # register info
-@app.route('/createUser/<email>/<username>/<password>/')
-def createUser(email, username, password):
-    params = (email, username, password)
+@app.route('/createUser/<email>/<password>/')
+def createUser(email, password):
+    salt = uuid.uuid4().hex
+    hashed_password = getPasswordHash(password, salt)
+    params = (email, hashed_password, salt)
+
     conn = mysql.connect()
     cur = conn.cursor()
-    query = "INSERT INTO user(username, email, password) VALUES(%s, %s, %s)"
+    query = "INSERT INTO user(email, password, salt) VALUES(%s, %s, %s)"
     cur.execute(query, params)
-    id = cur.lastrowid
+    # id = cur.lastrowid
     conn.commit()
     conn.close()
 
-    return "Done"
+    return "OK. Added user " + email
 
-#username
-#email
-#password
-#sale - leave it empty
+def getPasswordHash(password, salt):
+    return hashlib.sha512(password + salt).hexdigest()
+
 
 @app.route('/hello/')
 def hello():
