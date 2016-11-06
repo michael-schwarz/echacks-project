@@ -112,17 +112,17 @@ def savePicture(userId, lat, lng):
 
     if not userId or userId.isspace():
         return generateJsonError('User id is empty!')
-    if sint(userId) is None:
+    if sfloat(userId) is None:
         return generateJsonError('Invalid input for user id: "' + userId + '"')
 
     if not lat or lat.isspace():
         return generateJsonError('Latitude value is empty!')
-    if sint(lat) is None:
+    if sfloat(lat) is None:
         return generateJsonError('Invalid input for latitude value: "' + lat + '"')
 
     if not lng or lng.isspace():
         return generateJsonError('Longitude value is empty!')
-    if sint(lng) is None:
+    if sfloat(lng) is None:
         return generateJsonError('Invalid input for longitude value: "' + lng + '"')
 
     if 'imagefile' not in request.files:
