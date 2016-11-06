@@ -1,3 +1,4 @@
+import collections
 import os
 import hashlib, uuid
 
@@ -102,7 +103,22 @@ def getPicturesByCoords(lat, lng, radius):
     data = cur.fetchall()
     conn.close()
 
-    return json.jsonify(data)
+    return json.jsonify(convertCoordsToJson(data))
+
+def convertCoordsToJson(rows):
+    objects_list = []
+    for row in rows:
+        d = collections.OrderedDict()
+        d['id'] = row[0]
+        d['user_id'] = row[1]
+        d['lat'] = row[2]
+        d['lng'] = row[3]
+        objects_list.append(d)
+
+    returnObj = collections.OrderedDict()
+    returnObj['listOfPictures'] = objects_list
+
+    return returnObj
 
 #get use by id
 @app.route('/user/<id>/')
@@ -132,11 +148,11 @@ def createUser(email, password):
     cur = conn.cursor()
     query = "INSERT INTO user(email, password, salt) VALUES(%s, %s, %s)"
     cur.execute(query, params)
-    # id = cur.lastrowid
+    id = cur.lastrowid
     conn.commit()
     conn.close()
 
-    return "OK. Added user " + email
+    return user(id)
 
 # login
 @app.route('/login/<email>/<userPass>/')
