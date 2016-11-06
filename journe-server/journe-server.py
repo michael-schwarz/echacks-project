@@ -1,3 +1,4 @@
+import collections
 import os
 import hashlib, uuid
 
@@ -26,12 +27,15 @@ CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 JPG_EXT = ".jpg"
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'JPG', 'JPEG'])  # 'png', 'gif'
 DEFAULT_IMG = CURRENT_DIRECTORY + 'default-img' + JPG_EXT
-#app.use_x_sendfile = True
+
+
+# app.use_x_sendfile = True
 
 
 @app.route('/')
 def main():
     return render_template('index.html')
+
 
 # GET PICTURE
 @app.route('/getPicture/<id>/')
@@ -87,6 +91,7 @@ def savePicture(user_id, lat, lng):
     return "End of function saveImage, no successful!!"
 
 
+# GET PICTURE BY COORDINATES
 @app.route('/getPicturesByCoords/<lat>/<lng>/<radius>/')
 def getPicturesByCoords(lat, lng, radius):
     latMin = float(lat) - float(radius)
@@ -102,11 +107,32 @@ def getPicturesByCoords(lat, lng, radius):
     data = cur.fetchall()
     conn.close()
 
-    return json.jsonify(data)
+    return json.jsonify(convertCoordsToJson(data))
 
-#get use by id
+
+def convertCoordsToJson(rows):
+    objects_list = []
+    for row in rows:
+        d = collections.OrderedDict()
+        d['id'] = row[0]
+        d['userId'] = row[1]
+        d['lat'] = row[2]
+        d['lng'] = row[3]
+        objects_list.append(d)
+
+    returnObj = collections.OrderedDict()
+    returnObj['listOfPictures'] = objects_list
+
+    return returnObj
+
+
+# GET USER BY ID
 @app.route('/user/<id>/')
 def user(id):
+    if sint(id) is None:
+        return generateJsonError("Invalid input for user id: \"" + id + "\""
+                                                                        "")
+
     params = (id)
     conn = mysql.connect()
     cur = conn.cursor()
@@ -118,10 +144,10 @@ def user(id):
     if data is not None:
         return json.jsonify({"id": data[0], "email": data[1], "points": data[2]})
     else:
-        return json.jsonify({})
+        return generateJsonError("No user with id " + id + " found.")
 
 
-# register info
+# SIGN UP
 @app.route('/createUser/<email>/<password>/')
 def createUser(email, password):
     salt = uuid.uuid4().hex
@@ -132,13 +158,14 @@ def createUser(email, password):
     cur = conn.cursor()
     query = "INSERT INTO user(email, password, salt) VALUES(%s, %s, %s)"
     cur.execute(query, params)
-    # id = cur.lastrowid
+    id = cur.lastrowid
     conn.commit()
     conn.close()
 
-    return "OK. Added user " + email
+    return user(id)
 
-# login
+
+# CHECK IF USER AND PASSWORD MATCH
 @app.route('/login/<email>/<userPass>/')
 def login(email, userPass):
     conn = mysql.connect()
@@ -149,20 +176,37 @@ def login(email, userPass):
     conn.close()
 
     if data is not None:
-        password_matchtest = getPasswordHash(userPass, data[0]) # Here, data is salt,
-        #password_matchtest after running becomes hashed_password
+        password_matchtest = getPasswordHash(userPass, data[0])
 
-        #print (password_matchtest+ '\n')
-        #print (data[1] + '\n')
-
-        if password_matchtest == data[1]:   #data[1] here is the password stored in the database
+        if password_matchtest == data[1]:
             return user(data[2])
 
     return json.jsonify({})
 
+
 def getPasswordHash(password, salt):
     return hashlib.sha512(password + salt).hexdigest()
 
+
+def generateJsonError(errorMsg):
+    return json.jsonify({"errorReason": errorMsg})
+
+
+def ignore_exception(IgnoreException=Exception,DefaultVal=None):
+    """ Decorator for ignoring exception from a function
+    e.g.   @ignore_exception(DivideByZero)
+    e.g.2. ignore_exception(DivideByZero)(Divide)(2/0)
+    """
+    def dec(function):
+        def _dec(*args, **kwargs):
+            try:
+                return function(*args, **kwargs)
+            except IgnoreException:
+                return DefaultVal
+        return _dec
+    return dec
+
+sint = ignore_exception(ValueError)(int)
 
 @app.route('/hello/')
 def hello():
@@ -170,4 +214,4 @@ def hello():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',threaded=True)
+    app.run(host='0.0.0.0', threaded=True)
