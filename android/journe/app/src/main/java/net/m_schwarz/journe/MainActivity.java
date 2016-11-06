@@ -22,6 +22,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -46,7 +47,7 @@ public class MainActivity extends AppCompatActivity
 
     private double lastLat = 0;
     private double lastLng = 0;
-    private double deltaLocation = 0.0001;
+    private double deltaLocation = 0.00001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,6 +126,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void gotUserDetails(User user) {
+        if(user == null){
+            Toast.makeText(this, "Excuse our mess, our server is apparently out for a coffee break.", Toast.LENGTH_SHORT).show();
+        }
+
         TextView points = (TextView) findViewById(R.id.points);
         points.setText("Points: " + user.points);
 
@@ -222,16 +227,14 @@ public class MainActivity extends AppCompatActivity
         public void onLocationChanged(Location location) {
             if(Math.abs(location.getLatitude() -lastLat) < deltaLocation &&
                     Math.abs(location.getLongitude() -lastLng) < deltaLocation){
-                Toast.makeText(
-                        getBaseContext(),
+                Log.v("LOCATION",
                         "Location changed but considered irrelevant: Lat: " + location.getLatitude() + " Lng: "
-                                + location.getLongitude(), Toast.LENGTH_SHORT).show();
+                                + location.getLongitude());
             }
             else{
-                Toast.makeText(
-                        getBaseContext(),
+                Log.v("LOCATION",
                         "Location changed: Lat: " + location.getLatitude() + " Lng: "
-                                + location.getLongitude(), Toast.LENGTH_SHORT).show();
+                                + location.getLongitude());
 
                 lastLat = location.getLatitude();
                 lastLng = location.getLongitude();

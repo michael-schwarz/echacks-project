@@ -18,4 +18,17 @@
         android:scaleType="centerCrop"
         android:visibility="gone"
         android:src="@drawable/side_nav_bar" />
+    <TextView
+        android:id="@+id/closeness"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:paddingLeft="6dp"
+        android:paddingBottom="6dp"
+        android:textStyle="bold"
+        android:textColor="#ffffff"
+        android:visibility="gone"
+        android:text="very close"
+        />
 </RelativeLayout>
