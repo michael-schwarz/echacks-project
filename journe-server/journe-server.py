@@ -10,6 +10,7 @@ from flask import Flask, render_template, json
 from flask.ext.mysql import MySQL
 
 from flask import Flask, request, redirect, url_for
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 mysql = MySQL()
@@ -40,21 +41,27 @@ def main():
 # GET PICTURE
 @app.route('/getPicture/<id>/')
 def getPicture(id):
+    if not id or id.isspace():
+        return generateJsonError("Id is empty!")
+
+    if sint(id) is None:
+        return generateJsonError('Invalid input for image id: "' + id + '"')
+
     conn = mysql.connect()
     cur = conn.cursor()
     query = "SELECT id FROM picture WHERE id = %s"
     cur.execute(query, id)
     data = cur.fetchone()
+    conn.close()
+
     filename = ''
     if data is not None and len(data) > 0:
-        filename = CURRENT_DIRECTORY + UPLOAD_FOLDER + str(data[0]) + JPG_EXT
-
-    conn.close()
+        filename = CURRENT_DIRECTORY + UPLOAD_FOLDER + id + JPG_EXT
 
     if os.path.isfile(filename):
         return send_file(filename, mimetype='image/jpeg')
     else:
-        print "Failed to get image \"" + filename + "\". Return default image."
+        print 'Failed to get image "' + id + '". Return default image.'
         return send_file(DEFAULT_IMG, mimetype='image/jpeg')
 
 
@@ -130,8 +137,7 @@ def convertCoordsToJson(rows):
 @app.route('/user/<id>/')
 def user(id):
     if sint(id) is None:
-        return generateJsonError("Invalid input for user id: \"" + id + "\""
-                                                                        "")
+        return generateJsonError('Invalid input for user id: "' + id + '"')
 
     params = (id)
     conn = mysql.connect()
@@ -150,6 +156,25 @@ def user(id):
 # SIGN UP
 @app.route('/createUser/<email>/<password>/')
 def createUser(email, password):
+    if not email or email.isspace():
+        return generateJsonError("Email is empty!")
+
+    if not password or password.isspace():
+        return generateJsonError("Password is empty!")
+
+    if len(password) < 6:
+        return generateJsonError("Password must have at least 6 characters.")
+
+    conn = mysql.connect()
+    cur = conn.cursor()
+    query = "SELECT id FROM user WHERE email = %s"
+    cur.execute(query, email)
+    data = cur.fetchone()
+    conn.close()
+
+    if data is not None:
+        return generateJsonError('User with email "' + email + '" already exists.')
+
     salt = uuid.uuid4().hex
     hashed_password = getPasswordHash(password, salt)
     params = (email, hashed_password, salt)
@@ -192,21 +217,26 @@ def generateJsonError(errorMsg):
     return json.jsonify({"errorReason": errorMsg})
 
 
-def ignore_exception(IgnoreException=Exception,DefaultVal=None):
+def ignore_exception(IgnoreException=Exception, DefaultVal=None):
     """ Decorator for ignoring exception from a function
     e.g.   @ignore_exception(DivideByZero)
     e.g.2. ignore_exception(DivideByZero)(Divide)(2/0)
     """
+
     def dec(function):
         def _dec(*args, **kwargs):
             try:
                 return function(*args, **kwargs)
             except IgnoreException:
                 return DefaultVal
+
         return _dec
+
     return dec
 
+
 sint = ignore_exception(ValueError)(int)
+
 
 @app.route('/hello/')
 def hello():
