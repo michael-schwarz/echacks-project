@@ -70,8 +70,11 @@ public class LoginActivity extends AppCompatActivity {
             finish();
             startActivity(intent);
         } else {
-            Toast.makeText(this, "Error logging in", Toast.LENGTH_SHORT).show();
+            if(user != null && user.errorReason != null){
+                Toast.makeText(this,user.errorReason, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Error logging in", Toast.LENGTH_SHORT).show();
+            }
         }
     }
-
 }

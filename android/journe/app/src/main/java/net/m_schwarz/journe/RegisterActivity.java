@@ -71,7 +71,11 @@ public class RegisterActivity extends AppCompatActivity {
             finish();
             startActivity(intent);
         } else {
-            Toast.makeText(this, "Error signing up", Toast.LENGTH_SHORT).show();
+            if(user != null && user.errorReason != null){
+                Toast.makeText(this,user.errorReason, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Error signing up", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

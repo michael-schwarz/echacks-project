@@ -58,7 +58,7 @@ public class FullscreenViewActivity extends AppCompatActivity {
             // Delayed display of UI elements
             ActionBar actionBar = getSupportActionBar();
             if (actionBar != null) {
-                actionBar.show();
+                 // actionBar.show();
             }
             imageView.setVisibility(View.VISIBLE);
         }
@@ -121,7 +121,7 @@ public class FullscreenViewActivity extends AppCompatActivity {
         // Trigger the initial hide() shortly after the activity has been
         // created, to briefly hint to the user that UI controls
         // are available.
-        delayedHide(100);
+        delayedHide(0);
     }
 
     @Override
