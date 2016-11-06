@@ -142,6 +142,14 @@ def savePicture(userId, lat, lng):
     file.filename = str(id) + JPG_EXT
     file.save(CURRENT_DIRECTORY + UPLOAD_FOLDER + file.filename)
 
+    conn = mysql.connect()
+    cur = conn.cursor()
+    query = "UPDATE user SET points = points + 60 WHERE id = %s"
+    cur.execute(query, userId)
+    # data = cur.fetchone()
+    conn.commit()
+    conn.close()
+
     return json.jsonify({"id": id, "userId": userId, "lat": lat, "lng": lng})
 
 
