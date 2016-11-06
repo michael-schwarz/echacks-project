@@ -144,7 +144,7 @@ def savePicture(userId, lat, lng):
 
     conn = mysql.connect()
     cur = conn.cursor()
-    query = "UPDATE user SET points += 60 WHERE id = %s"
+    query = "UPDATE user SET points = points + 60 WHERE id = %s"
     cur.execute(query, userId)
     conn.commit()
     conn.close()
