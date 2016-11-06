@@ -272,7 +272,7 @@ def login(email, password):
         if passwordMatchtest == data[1]:
             return user(data[2])
         else:
-            return generateJsonError("Email und password do not match!")
+            return generateJsonError("Email and password do not match!")
     else:
         return generateJsonError('No user with email "' + email + '" found.')
 
