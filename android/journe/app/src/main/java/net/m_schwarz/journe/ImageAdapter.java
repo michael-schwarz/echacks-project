@@ -12,6 +12,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
+import net.m_schwarz.journe.Comm.GeoImage;
+
 import java.io.InputStream;
 
 /**
