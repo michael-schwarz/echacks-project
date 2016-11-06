@@ -12,6 +12,11 @@ from flask.ext.mysql import MySQL
 from flask import Flask, request, redirect, url_for
 from werkzeug.utils import secure_filename
 
+
+# +++++++++++++++++++++++++++
+#   DEFINITIONS
+# +++++++++++++++++++++++++++
+
 app = Flask(__name__)
 mysql = MySQL()
 
@@ -30,12 +35,45 @@ ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'JPG', 'JPEG'])  # 'png', 'gif'
 DEFAULT_IMG = CURRENT_DIRECTORY + 'default-img' + JPG_EXT
 
 
-# app.use_x_sendfile = True
+# +++++++++++++++++++++++++++
+#   HELPER FUNCTIONS
+# +++++++++++++++++++++++++++
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
+def getPasswordHash(password, salt):
+    return hashlib.sha512(password + salt).hexdigest()
+
+def generateJsonError(errorMsg):
+    return json.jsonify({"errorReason": errorMsg})
+
+def ignore_exception(IgnoreException=Exception, DefaultVal=None):
+    def dec(function):
+        def _dec(*args, **kwargs):
+            try:
+                return function(*args, **kwargs)
+            except IgnoreException:
+                return DefaultVal
+        return _dec
+    return dec
+
+sint = ignore_exception(ValueError)(int)
 
 
+# +++++++++++++++++++++++++++
+#   ROUTINGS
+# +++++++++++++++++++++++++++
+
+# MAIN
 @app.route('/')
 def main():
     return render_template('index.html')
+
+@app.route('/hello/')
+def hello():
+    return 'Hello, World!!!'
 
 
 # GET PICTURE
@@ -65,42 +103,65 @@ def getPicture(id):
         return send_file(DEFAULT_IMG, mimetype='image/jpeg')
 
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
-
 # SAVE PICTURE
-@app.route('/savePicture/<user_id>/<lat>/<lng>/', methods=['POST'])
-def savePicture(user_id, lat, lng):
-    params = (user_id, lat, lng)
-    # user_id = int(user_id)
-    # lat = float(lat)
-    # lng = float(lng)
-    if request.method == 'POST':
-        # check if the post request has the file part
-        if 'imagefile' not in request.files:
-            return 'No file part'
+@app.route('/savePicture/<userId>/<lat>/<lng>/', methods=['POST'])
+def savePicture(userId, lat, lng):
+    if request.method != 'POST':
+        return generateJsonError('Saving picture just works over POST requests.')
 
-        conn = mysql.connect()
-        cur = conn.cursor()
-        query = "INSERT INTO picture(user_id, lat, lng) VALUES(%s, %s, %s)"
-        cur.execute(query, params)
-        id = cur.lastrowid
-        conn.commit()
-        conn.close()
+    if not userId or userId.isspace():
+        return generateJsonError('User id is empty!')
+    if sint(userId) is None:
+        return generateJsonError('Invalid input for user id: "' + userId + '"')
 
-        file = request.files['imagefile']
-        file.filename = str(id) + JPG_EXT
-        file.save(CURRENT_DIRECTORY + UPLOAD_FOLDER + file.filename)
-        return "Success"
+    if not lat or lat.isspace():
+        return generateJsonError('Latitude value is empty!')
+    if sint(lat) is None:
+        return generateJsonError('Invalid input for latitude value: "' + lat + '"')
 
-    return "End of function saveImage, no successful!!"
+    if not lng or lng.isspace():
+        return generateJsonError('Longitude value is empty!')
+    if sint(lng) is None:
+        return generateJsonError('Invalid input for longitude value: "' + lng + '"')
+
+    if 'imagefile' not in request.files:
+        return generateJsonError('No image send in the POST request.')
+
+    file = request.files['imagefile']
+
+    params = (userId, lat, lng)
+    conn = mysql.connect()
+    cur = conn.cursor()
+    query = "INSERT INTO picture(user_id, lat, lng) VALUES(%s, %s, %s)"
+    cur.execute(query, params)
+    id = cur.lastrowid
+    conn.commit()
+    conn.close()
+
+    file.filename = str(id) + JPG_EXT
+    file.save(CURRENT_DIRECTORY + UPLOAD_FOLDER + file.filename)
+
+    return json.jsonify({"id": id, "userId": userId, "lat": lat, "lng": lng})
 
 
 # GET PICTURE BY COORDINATES
 @app.route('/getPicturesByCoords/<lat>/<lng>/<radius>/')
 def getPicturesByCoords(lat, lng, radius):
+    if not lat or lat.isspace():
+        return generateJsonError('Latitude value is empty!')
+    if sint(lat) is None:
+        return generateJsonError('Invalid input for latitude value: "' + lat + '"')
+
+    if not lng or lng.isspace():
+        return generateJsonError('Longitude value is empty!')
+    if sint(lng) is None:
+        return generateJsonError('Invalid input for longitude value: "' + lng + '"')
+
+    if not radius or radius.isspace():
+        return generateJsonError('Radius value is empty!')
+    if sint(radius) is None:
+        return generateJsonError('Invalid input for radius value: "' + radius + '"')
+
     latMin = float(lat) - float(radius)
     latMax = float(lat) + float(radius)
     lngMin = float(lng) - float(radius)
@@ -114,12 +175,8 @@ def getPicturesByCoords(lat, lng, radius):
     data = cur.fetchall()
     conn.close()
 
-    return json.jsonify(convertCoordsToJson(data))
-
-
-def convertCoordsToJson(rows):
     objects_list = []
-    for row in rows:
+    for row in data:
         d = collections.OrderedDict()
         d['id'] = row[0]
         d['userId'] = row[1]
@@ -127,15 +184,17 @@ def convertCoordsToJson(rows):
         d['lng'] = row[3]
         objects_list.append(d)
 
-    returnObj = collections.OrderedDict()
-    returnObj['listOfPictures'] = objects_list
+    returnList = collections.OrderedDict()
+    returnList['listOfPictures'] = objects_list
 
-    return returnObj
+    return json.jsonify(returnList)
 
 
 # GET USER BY ID
 @app.route('/user/<id>/')
 def user(id):
+    if type(id) is not int and (not id or id.isspace()):
+        return generateJsonError('Id value is empty!')
     if sint(id) is None:
         return generateJsonError('Invalid input for user id: "' + id + '"')
 
@@ -159,12 +218,6 @@ def createUser(email, password):
     if not email or email.isspace():
         return generateJsonError("Email is empty!")
 
-    if not password or password.isspace():
-        return generateJsonError("Password is empty!")
-
-    if len(password) < 6:
-        return generateJsonError("Password must have at least 6 characters.")
-
     conn = mysql.connect()
     cur = conn.cursor()
     query = "SELECT id FROM user WHERE email = %s"
@@ -174,6 +227,12 @@ def createUser(email, password):
 
     if data is not None:
         return generateJsonError('User with email "' + email + '" already exists.')
+
+    if not password or password.isspace():
+        return generateJsonError("Password is empty!")
+
+    if len(password) < 6:
+        return generateJsonError("Password must have at least 6 characters.")
 
     salt = uuid.uuid4().hex
     hashed_password = getPasswordHash(password, salt)
@@ -190,9 +249,15 @@ def createUser(email, password):
     return user(id)
 
 
-# CHECK IF USER AND PASSWORD MATCH
-@app.route('/login/<email>/<userPass>/')
-def login(email, userPass):
+# LOGIN CHECK IF USER AND PASSWORD MATCH
+@app.route('/login/<email>/<password>/')
+def login(email, password):
+    if not email or email.isspace():
+        return generateJsonError("Email is empty!")
+
+    if not password or password.isspace():
+        return generateJsonError("Password is empty!")
+
     conn = mysql.connect()
     cur = conn.cursor()
     query = "SELECT salt, password, id FROM user WHERE email = %s"
@@ -201,47 +266,18 @@ def login(email, userPass):
     conn.close()
 
     if data is not None:
-        password_matchtest = getPasswordHash(userPass, data[0])
+        passwordMatchtest = getPasswordHash(password, data[0])
 
-        if password_matchtest == data[1]:
+        if passwordMatchtest == data[1]:
             return user(data[2])
-
-    return json.jsonify({})
-
-
-def getPasswordHash(password, salt):
-    return hashlib.sha512(password + salt).hexdigest()
+        else:
+            return generateJsonError("Email und password do not match!")
+    else:
+        return generateJsonError('No user with email "' + email + '" found.')
 
 
-def generateJsonError(errorMsg):
-    return json.jsonify({"errorReason": errorMsg})
-
-
-def ignore_exception(IgnoreException=Exception, DefaultVal=None):
-    """ Decorator for ignoring exception from a function
-    e.g.   @ignore_exception(DivideByZero)
-    e.g.2. ignore_exception(DivideByZero)(Divide)(2/0)
-    """
-
-    def dec(function):
-        def _dec(*args, **kwargs):
-            try:
-                return function(*args, **kwargs)
-            except IgnoreException:
-                return DefaultVal
-
-        return _dec
-
-    return dec
-
-
-sint = ignore_exception(ValueError)(int)
-
-
-@app.route('/hello/')
-def hello():
-    return 'Hello, World!!!'
-
-
+# +++++++++++++++++++++++++++
+#   RUN APP
+# +++++++++++++++++++++++++++
 if __name__ == '__main__':
     app.run(host='0.0.0.0', threaded=True)
