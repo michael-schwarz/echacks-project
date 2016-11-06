@@ -15,6 +15,7 @@ public class User {
     public int points;
     public int id;
     public String email;
+    public String errorReason;
 
     public static User get(int id) throws Exception {
         URL url = new URL(Config.baseUrl + "/user/"+ id + "/");
