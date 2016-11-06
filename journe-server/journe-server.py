@@ -60,6 +60,7 @@ def ignore_exception(IgnoreException=Exception, DefaultVal=None):
     return dec
 
 sint = ignore_exception(ValueError)(int)
+sfloat = ignore_exception(ValueError)(float)
 
 
 # +++++++++++++++++++++++++++
@@ -149,17 +150,17 @@ def savePicture(userId, lat, lng):
 def getPicturesByCoords(lat, lng, radius):
     if not lat or lat.isspace():
         return generateJsonError('Latitude value is empty!')
-    if sint(lat) is None:
+    if sfloat(lat) is None:
         return generateJsonError('Invalid input for latitude value: "' + lat + '"')
 
     if not lng or lng.isspace():
         return generateJsonError('Longitude value is empty!')
-    if sint(lng) is None:
+    if sfloat(lng) is None:
         return generateJsonError('Invalid input for longitude value: "' + lng + '"')
 
     if not radius or radius.isspace():
         return generateJsonError('Radius value is empty!')
-    if sint(radius) is None:
+    if sfloat(radius) is None:
         return generateJsonError('Invalid input for radius value: "' + radius + '"')
 
     latMin = float(lat) - float(radius)
