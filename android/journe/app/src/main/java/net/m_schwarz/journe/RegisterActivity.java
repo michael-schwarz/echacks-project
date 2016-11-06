@@ -2,10 +2,8 @@ package net.m_schwarz.journe;
 
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -44,11 +42,11 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        AsyncTask<String,Void,User> getUserDetailsTask = new AsyncTask<String,Void,User>() {
+        AsyncTask<String,Void,User> userRegistrationTask = new AsyncTask<String,Void,User>() {
             @Override
             protected User doInBackground(String... params) {
                 try {
-                    return User.get(params[0], params[1]);
+                    return User.register(params[0], params[1]);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -60,17 +58,21 @@ public class RegisterActivity extends AppCompatActivity {
             }
         };
 
-        Preferences preferences = new Preferences(this);
-        preferences.setUserId(42);
 
-        Intent intent = new Intent(this,MainActivity.class);
-        finish();
-        startActivity(intent);
+        userRegistrationTask.execute(email,password);
     }
 
     private void gotUserDetails(User user) {
-        Preferences preferences = new Preferences(this);
-        preferences.setUserId(user.id);
+        if(user != null && user.email != null){
+            Preferences preferences = new Preferences(this);
+            preferences.setUserId(user.id);
+
+            Intent intent = new Intent(this,MainActivity.class);
+            finish();
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "Error signing up", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void clickLogin(View view) {

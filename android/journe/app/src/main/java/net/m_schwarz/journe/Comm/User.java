@@ -34,8 +34,26 @@ public class User {
         return gson.fromJson(message, User.class);
     }
 
-    public static User get(String email, String password) throws Exception {
-        URL url = new URL(Config.baseUrl + "/loginUser/"+ email+"/" + password);
+    public static User register(String email, String password) throws Exception {
+        URL url = new URL(Config.baseUrl + "/createUser/" + email + "/" + password + "/");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line+"\n");
+        }
+        br.close();
+        String message = sb.toString();
+
+        Gson gson = new Gson();
+        return gson.fromJson(message, User.class);
+    }
+
+    public static User login(String email, String password) throws Exception {
+        URL url = new URL(Config.baseUrl + "/login/" + email + "/" + password + "/");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
 

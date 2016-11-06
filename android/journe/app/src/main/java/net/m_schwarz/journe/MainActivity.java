@@ -31,6 +31,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import net.m_schwarz.journe.Comm.Config;
+import net.m_schwarz.journe.Comm.GeoImage;
 import net.m_schwarz.journe.Comm.ImageUpload;
 import net.m_schwarz.journe.Comm.User;
 
@@ -42,10 +44,12 @@ import java.util.Date;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private double lastLat = 0;
+    private double lastLng = 0;
+    private double deltaLocation = 0.0001;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.activity_main);
@@ -96,31 +100,15 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
-        getUserDetailsTask.execute(12);
+        getUserDetailsTask.execute(preferences.getUserId());
 
-        GeoImage[] values = new GeoImage[10];
-        for (int i = 0; i < 10; i++) {
-            values[i] = new GeoImage("http://35.162.35.171:5000/getPicture/"+(i)+"/");
-        }
-
-
-        ListView lv = (ListView) findViewById(R.id.listview);
-        ArrayAdapter<GeoImage> adapter = new ImageAdapter(this, values);
-
-        lv.setAdapter(adapter);
         fixPermissions();
 
         LocationManager locationManager = (LocationManager)
                 getSystemService(Context.LOCATION_SERVICE);
         LocationListener locationListener = new MyLocationListener();
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         locationManager.requestLocationUpdates(
@@ -184,7 +172,6 @@ public class MainActivity extends AppCompatActivity
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
-
             }
         }
     }
@@ -233,25 +220,37 @@ public class MainActivity extends AppCompatActivity
     public class MyLocationListener implements LocationListener {
         @Override
         public void onLocationChanged(Location location) {
-            Toast.makeText(
-                    getBaseContext(),
-                    "Location changed: Lat: " + location.getLatitude() + " Lng: "
-                            + location.getLongitude(), Toast.LENGTH_SHORT).show();
+            if(Math.abs(location.getLatitude() -lastLat) < deltaLocation &&
+                    Math.abs(location.getLongitude() -lastLng) < deltaLocation){
+                Toast.makeText(
+                        getBaseContext(),
+                        "Location changed but considered irrelevant: Lat: " + location.getLatitude() + " Lng: "
+                                + location.getLongitude(), Toast.LENGTH_SHORT).show();
+            }
+            else{
+                Toast.makeText(
+                        getBaseContext(),
+                        "Location changed: Lat: " + location.getLatitude() + " Lng: "
+                                + location.getLongitude(), Toast.LENGTH_SHORT).show();
+
+                lastLat = location.getLatitude();
+                lastLng = location.getLongitude();
+
+                new ImageBackgroundTask().execute(Config.baseUrl + "/"+
+                        "getPicturesByCoords/" + lastLat +"/"+ lastLng +"/"+10*deltaLocation+"/");
+            }
         }
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
-
         }
 
         @Override
         public void onProviderEnabled(String provider) {
-
         }
 
         @Override
         public void onProviderDisabled(String provider) {
-
         }
     }
 
@@ -273,7 +272,10 @@ public class MainActivity extends AppCompatActivity
                 }
 
                 @Override
-                protected void onPostExecute(Void _void) { }
+                protected void onPostExecute(Void _void) {
+                    new ImageBackgroundTask().execute(Config.baseUrl + "/"+
+                            "getPicturesByCoords/" + lastLat +"/"+ lastLng +"/"+10*deltaLocation+"/");
+                }
             };
 
             getUserDetailsTask.execute();
@@ -337,5 +339,29 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void updateImages(GeoImage[] images){
+        ListView lv = (ListView) findViewById(R.id.listview);
+        ArrayAdapter<GeoImage> adapter = new ImageAdapter(this, images);
+
+        lv.setAdapter(adapter);
+    }
+
+    protected class ImageBackgroundTask extends AsyncTask<String,Void,GeoImage[]>{
+        @Override
+        protected GeoImage[] doInBackground(String... params) {
+            try{
+                return GeoImage.load(params[0]);
+            }
+            catch(Exception e){
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(GeoImage[] images){
+            updateImages(images);
+        }
     }
 }

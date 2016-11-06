@@ -1,11 +1,14 @@
 package net.m_schwarz.journe;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import net.m_schwarz.journe.Comm.User;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -39,11 +42,36 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        Preferences preferences = new Preferences(this);
-        preferences.setUserId(42);
+        AsyncTask<String,Void,User> userLoginTask = new AsyncTask<String,Void,User>() {
+            @Override
+            protected User doInBackground(String... params) {
+                try {
+                    return User.login(params[0], params[1]);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+            @Override
+            protected void onPostExecute(User user) {
+                gotUserDetails(user);
+            }
+        };
 
-        Intent intent = new Intent(this,MainActivity.class);
-        finish();
-        startActivity(intent);
+        userLoginTask.execute(email,password);
     }
+
+    private void gotUserDetails(User user) {
+        if(user != null && user.email != null){
+            Preferences preferences = new Preferences(this);
+            preferences.setUserId(user.id);
+
+            Intent intent = new Intent(this,MainActivity.class);
+            finish();
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "Error logging in", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 }
