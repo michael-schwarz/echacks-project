@@ -11,6 +11,7 @@
 
     <ImageButton
         android:id="@+id/imageBox"
+        android:background="@drawable/ic_menu_camera"
         android:layout_width="match_parent"
         android:layout_height="120dp"
         android:src="@drawable/journe"

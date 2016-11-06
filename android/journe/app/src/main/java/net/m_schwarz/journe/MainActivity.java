@@ -44,6 +44,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.activity_main);
@@ -98,7 +100,7 @@ public class MainActivity extends AppCompatActivity
 
         GeoImage[] values = new GeoImage[10];
         for (int i = 0; i < 10; i++) {
-            values[i] = new GeoImage("http://echacks.lukas-kompatscher.eu:5000/getPicture/"+(i+14)+"/");
+            values[i] = new GeoImage("http://35.162.35.171:5000/getPicture/"+(i)+"/");
         }
 
 
