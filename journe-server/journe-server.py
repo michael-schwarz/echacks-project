@@ -27,12 +27,15 @@ CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 JPG_EXT = ".jpg"
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'JPG', 'JPEG'])  # 'png', 'gif'
 DEFAULT_IMG = CURRENT_DIRECTORY + 'default-img' + JPG_EXT
-#app.use_x_sendfile = True
+
+
+# app.use_x_sendfile = True
 
 
 @app.route('/')
 def main():
     return render_template('index.html')
+
 
 # GET PICTURE
 @app.route('/getPicture/<id>/')
@@ -87,6 +90,7 @@ def savePicture(user_id, lat, lng):
 
     return "End of function saveImage, no successful!!"
 
+
 # GET PICTURE BY COORDINATES
 @app.route('/getPicturesByCoords/<lat>/<lng>/<radius>/')
 def getPicturesByCoords(lat, lng, radius):
@@ -105,6 +109,7 @@ def getPicturesByCoords(lat, lng, radius):
 
     return json.jsonify(convertCoordsToJson(data))
 
+
 def convertCoordsToJson(rows):
     objects_list = []
     for row in rows:
@@ -120,11 +125,13 @@ def convertCoordsToJson(rows):
 
     return returnObj
 
+
 # GET USER BY ID
 @app.route('/user/<id>/')
 def user(id):
-    if type(id) is not int:
-        return generateJsonError("Invalid input for user id: \"" + id)
+    if sint(id) is None:
+        return generateJsonError("Invalid input for user id: \"" + id + "\""
+                                                                        "")
 
     params = (id)
     conn = mysql.connect()
@@ -137,7 +144,7 @@ def user(id):
     if data is not None:
         return json.jsonify({"id": data[0], "email": data[1], "points": data[2]})
     else:
-        return json.jsonify({})
+        return generateJsonError("No user with id " + id + " found.")
 
 
 # SIGN UP
@@ -156,6 +163,7 @@ def createUser(email, password):
     conn.close()
 
     return user(id)
+
 
 # CHECK IF USER AND PASSWORD MATCH
 @app.route('/login/<email>/<userPass>/')
@@ -180,10 +188,30 @@ def getPasswordHash(password, salt):
     return hashlib.sha512(password + salt).hexdigest()
 
 
+def generateJsonError(errorMsg):
+    return json.jsonify({"errorReason": errorMsg})
+
+
+def ignore_exception(IgnoreException=Exception,DefaultVal=None):
+    """ Decorator for ignoring exception from a function
+    e.g.   @ignore_exception(DivideByZero)
+    e.g.2. ignore_exception(DivideByZero)(Divide)(2/0)
+    """
+    def dec(function):
+        def _dec(*args, **kwargs):
+            try:
+                return function(*args, **kwargs)
+            except IgnoreException:
+                return DefaultVal
+        return _dec
+    return dec
+
+sint = ignore_exception(ValueError)(int)
+
 @app.route('/hello/')
 def hello():
     return 'Hello, World!!!'
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',threaded=True)
+    app.run(host='0.0.0.0', threaded=True)
