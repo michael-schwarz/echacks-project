@@ -87,7 +87,7 @@ def savePicture(user_id, lat, lng):
 
     return "End of function saveImage, no successful!!"
 
-
+# GET PICTURE BY COORDINATES
 @app.route('/getPicturesByCoords/<lat>/<lng>/<radius>/')
 def getPicturesByCoords(lat, lng, radius):
     latMin = float(lat) - float(radius)
@@ -110,7 +110,7 @@ def convertCoordsToJson(rows):
     for row in rows:
         d = collections.OrderedDict()
         d['id'] = row[0]
-        d['user_id'] = row[1]
+        d['userId'] = row[1]
         d['lat'] = row[2]
         d['lng'] = row[3]
         objects_list.append(d)
@@ -120,9 +120,12 @@ def convertCoordsToJson(rows):
 
     return returnObj
 
-#get use by id
+# GET USER BY ID
 @app.route('/user/<id>/')
 def user(id):
+    if type(id) is not int:
+        return generateJsonError("Invalid input for user id: \"" + id)
+
     params = (id)
     conn = mysql.connect()
     cur = conn.cursor()
@@ -137,7 +140,7 @@ def user(id):
         return json.jsonify({})
 
 
-# register info
+# SIGN UP
 @app.route('/createUser/<email>/<password>/')
 def createUser(email, password):
     salt = uuid.uuid4().hex
@@ -154,7 +157,7 @@ def createUser(email, password):
 
     return user(id)
 
-# login
+# CHECK IF USER AND PASSWORD MATCH
 @app.route('/login/<email>/<userPass>/')
 def login(email, userPass):
     conn = mysql.connect()
@@ -165,16 +168,13 @@ def login(email, userPass):
     conn.close()
 
     if data is not None:
-        password_matchtest = getPasswordHash(userPass, data[0]) # Here, data is salt,
-        #password_matchtest after running becomes hashed_password
+        password_matchtest = getPasswordHash(userPass, data[0])
 
-        #print (password_matchtest+ '\n')
-        #print (data[1] + '\n')
-
-        if password_matchtest == data[1]:   #data[1] here is the password stored in the database
+        if password_matchtest == data[1]:
             return user(data[2])
 
     return json.jsonify({})
+
 
 def getPasswordHash(password, salt):
     return hashlib.sha512(password + salt).hexdigest()
